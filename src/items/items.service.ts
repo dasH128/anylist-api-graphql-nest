@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
-import { CreateItemInput } from './dto/create-item.input';
-import { UpdateItemInput } from './dto/update-item.input';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateItemInput, UpdateItemInput } from './dto/inputs';
+import { Item } from './entities/item.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ItemsService {
-  create(createItemInput: CreateItemInput) {
-    return 'This action adds a new item';
+  constructor(
+    @InjectRepository(Item)
+    private readonly itemRepository: Repository<Item>,
+  ) {}
+
+  async create(createItemInput: CreateItemInput): Promise<Item> {
+    const newItem = await this.itemRepository.save(createItemInput);
+    return await this.itemRepository.save(newItem);
   }
 
-  findAll() {
-    return `This action returns all items`;
+  async findAll(): Promise<Item[]> {
+    var items = await this.itemRepository.find();
+
+    return items;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} item`;
+  async findOne(id: string): Promise<Item> {
+    var item = await this.itemRepository.findOneBy({ id });
+    if (!item) throw new NotFoundException(`Item wtih id ${id} not found`);
+
+    return item;
   }
 
-  update(id: number, updateItemInput: UpdateItemInput) {
-    return `This action updates a #${id} item`;
+  async update(id: string, updateItemInput: UpdateItemInput): Promise<Item> {
+    // var x = await this.itemRepository.update(id, updateItemInput);
+    var item = await this.itemRepository.preload(updateItemInput);
+    if (!item) throw new NotFoundException(`Item wtih id ${id} not found`);
+
+    return await this.itemRepository.save(item);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} item`;
+  async remove(id: string): Promise<Item> {
+    const item = await this.findOne(id);
+
+    await this.itemRepository.remove(item);
+    return { ...item, id };
   }
 }
