@@ -13,6 +13,7 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 import { SignupInput } from 'src/auth/dto/inputs/signup.input';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -36,13 +37,37 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return [];
+  async findAll(roles: ValidRoles[]): Promise<User[]> {
+    if (roles.length === 0) {
+      return await this.userRepository.find({
+        // relations: { lastUpdateBy: true },
+      });
+    }
+
+    const users = await this.userRepository
+      .createQueryBuilder()
+      .andWhere('ARRAY [roles] && ARRAY[:...roles]')
+      .setParameter('roles', roles)
+      .getMany();
+    return users;
   }
 
-  async findOne(id: string): Promise<User> {
-    let user = new User();
-    return user;
+  async update(
+    id: string,
+    updateUserInput: UpdateUserInput,
+    updateBy: User,
+  ): Promise<User> {
+    try {
+      const user = await this.userRepository.preload({
+        ...updateUserInput,
+        id: id,
+      });
+      user.lastUpdateBy = updateBy;
+
+      return await this.userRepository.save(user);
+    } catch (error) {
+      this.handleDBError(error);
+    }
   }
 
   async findOneByEmail(email: string): Promise<User> {
@@ -63,8 +88,12 @@ export class UsersService {
     }
   }
 
-  async block(id: string): Promise<User> {
-    throw new Error('block not implement');
+  async block(id: string, adminUser: User): Promise<User> {
+    const userToBlock = await this.findOneById(id);
+    userToBlock.isActive = false;
+    userToBlock.lastUpdateBy = adminUser;
+
+    return await this.userRepository.save(userToBlock);
   }
 
   private handleDBError(error: any): never {
