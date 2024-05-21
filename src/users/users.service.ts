@@ -30,7 +30,7 @@ export class UsersService {
         ...sigupInput,
         password: bcrypt.hashSync(sigupInput.password, 10),
       });
-      console.log(user);
+
       return await this.userRepository.save(user);
     } catch (error) {
       this.handleDBError(error);
