@@ -75,7 +75,7 @@ export class UsersService {
       return await this.userRepository.findOneByOrFail({ email });
     } catch (error) {
       console.table(error);
-      throw new NotFoundException(`${email} not found`);
+      throw new NotFoundException(`User with email: ${email} not found`);
     }
   }
 
@@ -84,7 +84,7 @@ export class UsersService {
       return await this.userRepository.findOneByOrFail({ id });
     } catch (error) {
       console.table(error);
-      throw new NotFoundException(`${id} not found`);
+      throw new NotFoundException(`User with id: ${id} not found`);
     }
   }
 

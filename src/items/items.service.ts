@@ -13,7 +13,7 @@ export class ItemsService {
   ) {}
 
   async create(createItemInput: CreateItemInput, user: User): Promise<Item> {
-    const newItem = await this.itemRepository.save({
+    const newItem = await this.itemRepository.create({
       ...createItemInput,
       user: user,
     });
