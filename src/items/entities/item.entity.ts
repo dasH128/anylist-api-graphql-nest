@@ -1,10 +1,12 @@
 import { ObjectType, Field, Int, ID, Float } from '@nestjs/graphql';
 import { User } from 'src/users/entities/user.entity';
+import { ListItem } from '../../list-item/entities/list-item.entity';
 import {
   Column,
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -31,6 +33,10 @@ export class Item {
   @ManyToOne(() => User, (user) => user.items, { nullable: false, lazy: true })
   @Index('userId-index')
   user: User;
+
+  @Field(() => [ListItem])
+  @OneToMany(() => ListItem, (listItem) => listItem.item, { lazy: true })
+  listItem: ListItem[];
 }
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE0OGNjZDRmLWVhZGQtNDRiMy1hNDUyLTNhY2YwZTk0ZDM5YyIsImlhdCI6MTcxNjE5MzU3MSwiZXhwIjoxNzE2MjA3OTcxfQ.r_DJN6i7NceBQ83LC1r--eHYjZsNgGtf83xTAY2uFnU
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjMwZjUzLTcxMDUtNDkwNy05Y2FhLTZlZThjOTk4NzcyMyIsImlhdCI6MTcxNjE5MzYwOCwiZXhwIjoxNzE2MjA4MDA4fQ.tuMi3TsQlAQl664h1AVmkvnyD3__amA9DPvvPOFOCtU

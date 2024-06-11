@@ -2,6 +2,22 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ListItem {
+  id: ID!
+  quantity: Float!
+  completed: Boolean!
+  list: List!
+  item: Item!
+}
+
+type List {
+  id: ID!
+  name: String!
+  user: User!
+  items(offset: Int = 0, limit: Int = 10, search: String): [ListItem!]!
+  totalItems: Int!
+}
+
 type User {
   id: ID!
   fullName: String!
@@ -11,6 +27,8 @@ type User {
   lastUpdateBy: User
   itemCount: Int!
   items(offset: Int = 0, limit: Int = 10, search: String): [Item!]!
+  listCount: Int!
+  lists(offset: Int = 0, limit: Int = 10, search: String): [List!]!
 }
 
 type Item {
@@ -23,6 +41,7 @@ type Item {
   """quantityUnits of Item"""
   quantityUnits: String
   user: User!
+  listItem: [ListItem!]!
 }
 
 type AuthResponse {
@@ -35,6 +54,9 @@ type Query {
   item(id: ID!): Item!
   users(roles: [validRoles!] = []): [User!]!
   user(id: ID!): User!
+  lists(offset: Int = 0, limit: Int = 10, search: String): [List!]!
+  list(id: ID!): List!
+  listItem(id: String!): ListItem!
   revalite: AuthResponse!
 }
 
@@ -50,6 +72,11 @@ type Mutation {
   removeItem(id: ID!): Item!
   updateUser(updateUserInput: UpdateUserInput!): User!
   blockUser(id: ID!): User!
+  createList(createListInput: CreateListInput!): List!
+  updateList(updateList: UpdateListInput!): List!
+  removeList(id: ID!): List!
+  createListItem(createListItemInput: CreateListItemInput!): ListItem!
+  updateListItem(updateListItemInput: UpdateListItemInput!): ListItem!
   signUp(signupInput: SignupInput!): AuthResponse!
   login(loginInput: LoginInput!): AuthResponse!
   executeSeed: Boolean!
@@ -73,6 +100,30 @@ input UpdateUserInput {
   id: ID!
   roles: [validRoles!]
   isActive: Boolean
+}
+
+input CreateListInput {
+  name: String!
+}
+
+input UpdateListInput {
+  name: String
+  id: ID!
+}
+
+input CreateListItemInput {
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID!
+  itemId: ID!
+}
+
+input UpdateListItemInput {
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID
+  itemId: ID
+  id: ID!
 }
 
 input SignupInput {
